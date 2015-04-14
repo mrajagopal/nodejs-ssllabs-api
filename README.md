@@ -29,6 +29,10 @@ A call to this method returns the options object with the appropriate parameters
 ### getEndpointData(host, endpoint)
 A call to this method returns the options object with the appropriate parameters for the getEndpointData API call.  This is then fed into an https.request() call.
 
+### getStatusCodes()
+No input parameters required.
+A call to this method returns the options object with the appropriate parameters for the getStatusCodes API call.  This is then fed into an https.request() call.
+
 ### response()
 No input parameters required.
 This method is typically passed to https.request() method as a callback.

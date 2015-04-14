@@ -26,17 +26,22 @@ SslLabsApi.prototype.analyzeHost = function(host){
 }
 
 SslLabsApi.prototype.analyzeHostCached = function(host){
-	this.options.path = SSL_LABS_API_V2 + '/analyze?host=' + host + '&fromCache=on';
+	this.options.path = SSL_LABS_API_V2 + '/analyze?host=' + host + '&fromCache=on&all=done';
 	return this.options;
 }
 
 SslLabsApi.prototype.analyzeHostNew = function(host){
-	this.options.path = SSL_LABS_API_V2 + '/analyze?host=' + host + '&startNew=on';
+	this.options.path = SSL_LABS_API_V2 + '/analyze?host=' + host + '&startNew=on&all=done';
 	return this.options;
 }
 
 SslLabsApi.prototype.getEndpointData = function(host, endpoint){
 	this.options.path = SSL_LABS_API_V2 + '/getEndpointData?host=' + host + '&s=' + endpoint;
+	return this.options;
+}
+
+SslLabsApi.prototype.getStatusCodes = function(){
+	this.options.path = SSL_LABS_API_V2 + '/getStatusCodes';
 	return this.options;
 }
 
