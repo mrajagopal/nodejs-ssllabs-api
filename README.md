@@ -27,4 +27,4 @@ A call to this method returns the options object with the appropriate parameters
 ### response()
 No input parameters required.
 This method is typically passed to https.request() method as a callback.
-This method outputs the response of an of the above API calls.
+This method outputs the response of any of the above API calls.
