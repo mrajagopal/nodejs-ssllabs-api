@@ -12,12 +12,6 @@ function SslLabsApi(){
 		host: 'api.ssllabs.com',
  		method: 'GET',
  		path: '/',
- 		publish: 'off',
- 		startNew: 'off',
- 		fromCache: 'off',
- 		maxAge: 'null',
- 		all: 'done',
- 		ignoreMismatch: 'off'
 	}
 }
 
