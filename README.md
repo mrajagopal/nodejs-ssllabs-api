@@ -21,6 +21,11 @@ This is a wrapper for the API call: analyze with flag for cached-response set to
 Input parameters: host: as a domain name
 A call to this method returns the options object with the appropriate parameters for the analyze API call.  This is then fed into an https.request() call.
 
+### analyzeHostNew(host)
+This is a wrapper for the API call: analyze with flag for startNew set to TRUE.
+Input parameters: host: as a domain name
+A call to this method returns the options object with the appropriate parameters for the analyze API call.  This is then fed into an https.request() call.
+
 ### getEndpointData(host, endpoint)
 A call to this method returns the options object with the appropriate parameters for the getEndpointData API call.  This is then fed into an https.request() call.
 

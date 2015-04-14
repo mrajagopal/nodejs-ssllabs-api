@@ -26,7 +26,12 @@ SslLabsApi.prototype.analyzeHost = function(host){
 }
 
 SslLabsApi.prototype.analyzeHostCached = function(host){
-	this.options.path = SSL_LABS_API_V2 + '/analyze?host=' + host;
+	this.options.path = SSL_LABS_API_V2 + '/analyze?host=' + host + '&fromCache=on';
+	return this.options;
+}
+
+SslLabsApi.prototype.analyzeHostNew = function(host){
+	this.options.path = SSL_LABS_API_V2 + '/analyze?host=' + host + '&startNew=on';
 	return this.options;
 }
 
