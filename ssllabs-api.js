@@ -1,7 +1,6 @@
 "use strict";
 
-var https = require('https'),
-    SSL_LABS_API_V2 = "/api/v2";
+var SSL_LABS_API_V2 = "/api/v2";
 
 // Instantiate if one not already created/new'ed
 function SslLabsApi(){
@@ -27,22 +26,22 @@ SslLabsApi.prototype.info = function(){
 	return this.options;
 }
 
-SslLabsApi.prototype.fetchHostInformation = function(host){
+SslLabsApi.prototype.analyzeHost = function(host){
 	this.options.path = SSL_LABS_API_V2 + '/analyze?host=' + host;
 	return this.options;
 }
 
-SslLabsApi.prototype.fetchHostInformationCached = function(host){
+SslLabsApi.prototype.analyzeHostCached = function(host){
 	this.options.path = SSL_LABS_API_V2 + '/analyze?host=' + host;
 	return this.options;
 }
 
-SslLabsApi.prototype.fetchEndpointData = function(host){
-	this.options.path = SSL_LABS_API_V2 + '/getEndpointData?host=' + host;
+SslLabsApi.prototype.getEndpointData = function(host, endpoint){
+	this.options.path = SSL_LABS_API_V2 + '/getEndpointData?host=' + host + '&s=' + endpoint;
 	return this.options;
 }
 
-SslLabsApi.prototype.verify = function(response){
+SslLabsApi.prototype.response = function(response){
 	var str = '';
 
 	response.on('data', function (chunk){
@@ -54,9 +53,5 @@ SslLabsApi.prototype.verify = function(response){
 	});
 }
 
-var sslApi = new SslLabsApi();
-https.request(sslApi.info(), sslApi.verify.bind(sslApi)).end();
 
-
-var testhost = 'www.westpac.co.nz';
-https.request(sslApi.fetchHostInformation(testhost), sslApi.verify.bind(sslApi)).end();
+module.exports = SslLabsApi;
