@@ -2,13 +2,25 @@ var https = require('https');
 var async = require('async');
 var sslLabsApi = require('./ssllabs-api');
 
-var sslApi = new sslLabsApi();
+var testhost = 'www.f5.com';
+var sslApi = new sslLabsApi(testhost);
+// var intervalObj = undefined;
+sslApi.on('analyzeData', function(data){
+	sslApi.getEndpointData(sslApi.getEndpointIpAddr(data));
+});
 
-https.request(sslApi.info(), sslApi.response.bind(sslApi)).end();
+sslApi.on('response', function(data){
+	console.log('Received general response data: "' + JSON.stringify(data) + '"');
+});
 
-var testhost = 'www.westpac.co.nz';
-https.request(sslApi.analyzeHostNew(testhost), sslApi.response.bind(sslApi)).end();
-https.request(sslApi.analyzeHost(testhost), sslApi.response.bind(sslApi)).end();
-https.request(sslApi.analyzeHostCached(testhost), sslApi.response.bind(sslApi)).end();
-https.request(sslApi.getEndpointData(testhost, '202.7.39.69'), sslApi.response.bind(sslApi)).end();
-https.request(sslApi.getStatusCodes(), sslApi.response.bind(sslApi)).end();
+sslApi.on('endpointData', function(data){
+	console.log('Received endpoints data: "' + JSON.stringify(data) + '"');
+});
+
+sslApi.on('statusCodesData', function(data){
+	console.log('Received status-codes data: "' + JSON.stringify(data) + '"');
+});
+
+sslApi.info();
+sslApi.analyzeHostNew();
+
