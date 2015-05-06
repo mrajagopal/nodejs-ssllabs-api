@@ -9,7 +9,7 @@ Further details of the API can be found at this URL: https://github.com/ssllabs/
 ### info()
 This is a wrapper for the API call: Info.
 No input parameters required.  
-A call to this method returns the options object with the appropriate parameters for the info API call.  This is then fed into an https.request() call.
+A call to this method makes an https request to the info URI.
 
 ### analyzeHost(host)
 This is a wrapper for the API call: analyze.
