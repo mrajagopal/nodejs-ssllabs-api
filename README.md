@@ -8,25 +8,25 @@ Further details of the API can be found at this URL: https://github.com/ssllabs/
 
 ### info()
 This is a wrapper for the API call: Info.
-No input parameters required.  
+Input parameters: None
 A call to this method makes an https request to the info URI.
 
-### analyzeHost(host)
+### analyzeHost()
 This is a wrapper for the API call: analyze.
-Input parameters: host: as a domain name
-A call to this method returns the options object with the appropriate parameters for the analyze API call.  This is then fed into an https.request() call.
+Input parameters: None
+A call to this method returns an HTTPS request to the analyze URI.
 
-### analyzeHostCached(host)
+### analyzeHostCached()
 This is a wrapper for the API call: analyze with flag for cached-response set to TRUE.
-Input parameters: host: as a domain name
+Input parameters: None
 A call to this method returns the options object with the appropriate parameters for the analyze API call.  This is then fed into an https.request() call.
 
-### analyzeHostNew(host)
+### analyzeHostNew()
 This is a wrapper for the API call: analyze with flag for startNew set to TRUE.
-Input parameters: host: as a domain name
+Input parameters: host: None
 A call to this method returns the options object with the appropriate parameters for the analyze API call.  This is then fed into an https.request() call.
 
-### getEndpointData(host, endpoint)
+### getEndpointData(endpoint)
 A call to this method returns the options object with the appropriate parameters for the getEndpointData API call.  This is then fed into an https.request() call.
 
 ### getStatusCodes()
