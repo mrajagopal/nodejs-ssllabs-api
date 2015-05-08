@@ -7,33 +7,31 @@ Further details of the API can be found at this URL: https://github.com/ssllabs/
 ## Methods
 
 ### info()
-This is a wrapper for the API call: Info.
 Input parameters: None
-A call to this method makes an https request to the info URI.
-
-### analyzeHost()
-This is a wrapper for the API call: analyze.
-Input parameters: None
-A call to this method returns an HTTPS request to the analyze URI.
-
-### analyzeHostCached()
-This is a wrapper for the API call: analyze with flag for cached-response set to TRUE.
-Input parameters: None
-A call to this method returns the options object with the appropriate parameters for the analyze API call.  This is then fed into an https.request() call.
+A call to this method makes an HTTPS request to the info URI.
 
 ### analyzeHostNew()
-This is a wrapper for the API call: analyze with flag for startNew set to TRUE.
 Input parameters: host: None
-A call to this method returns the options object with the appropriate parameters for the analyze API call.  This is then fed into an https.request() call.
+A call to this method makes an HTTPS request to the analyze URI. Use this method to obtain fresh test results for a particular hosts.
+
+### analyzeHost()
+Input parameters: None
+Note: This is information only. A call to this method makes an HTTPS request to the analyze URI.  Use this method after calling analyzeHostNew() to periodically check when an assessment is finished.  This is being done in the background and on successful completion or error an event is emitted to the caller. 
+
+### analyzeHostCached()
+Input parameters: None
+A call to this method makes an HTTPS request to the anaylze URI with the fromCache option "on".  If the result requested is available it will be returned straight away.  Otherwise a new assessment is started.
 
 ### getEndpointData(endpoint)
-A call to this method returns the options object with the appropriate parameters for the getEndpointData API call.  This is then fed into an https.request() call.
+Input parameters: endpoint ip-address
+A call to this method makes an HTTPS request to the getEndpointData URI with endpoint ip-address. This returns a single endpoint object that contains the complete assessment information.  This will emit a 'endpointData' event with associated response data of the endpoint.
 
 ### getStatusCodes()
-No input parameters required.
-A call to this method returns the options object with the appropriate parameters for the getStatusCodes API call.  This is then fed into an https.request() call.
+Input parameters: None
+A call to this method makes an HTTPS request to the getStatusCodes URI.  This will emit a 'statusCodesData' event and associated response data of status codes and corresponding English translations.
 
-### response()
-No input parameters required.
-This method is typically passed to https.request() method as a callback.
-This method outputs the response of any of the above API calls.
+Events emitted:
+*analyzeData
+*endpointData
+*statusCodesData
+*response
