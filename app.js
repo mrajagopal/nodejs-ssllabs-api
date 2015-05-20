@@ -3,7 +3,8 @@ var async = require('async');
 var sslLabsApi = require('./ssllabs-api');
 
 var testhost = 'www.f5.com';
-var sslApi = new sslLabsApi(testhost);
+var sslApi = sslLabsApi(testhost);
+
 
 sslApi.on('analyzeData', function(data){
 	sslApi.getEndpointData(sslApi.getEndpointIpAddr(data));
