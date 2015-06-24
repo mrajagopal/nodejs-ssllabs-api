@@ -23,6 +23,10 @@ sslApi.on('statusCodesData', function(data){
   console.log('Received status-codes data: "' + JSON.stringify(data) + '"');
 });
 
+sslApi.on('error', function(data){
+  console.log('Received error event: ', JSON.stringify(data));
+}
+
 async.series([
 // sslApi.getStatusCodes(),
  sslApi.analyzeHostCached()
