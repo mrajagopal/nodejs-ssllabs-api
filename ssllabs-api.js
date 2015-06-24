@@ -63,9 +63,7 @@ SslLabsApi.prototype.analyzeHost = function(){
     req.abort();
   });
 
-
   req.end();
-
   req.on('error', function(e){
     debugLog(e);
     clearInterval(intervalObj);
@@ -91,13 +89,6 @@ SslLabsApi.prototype.analyzeHostCached = function(){
     clearInterval(intervalObj);
     self.emit('error', 'Aborting');
   });
-
-//  req.on('timeout', function(e){
-//    debugLog(e);
-//    req.close();
-//    clearInterval(intervalObj);
-//    self.emit('error', 'Aborting');
-//  });
 }
 
 
