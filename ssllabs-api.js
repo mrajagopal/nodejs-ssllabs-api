@@ -16,9 +16,9 @@ function debugLog(log){
 
 
 // Instantiate if one not already created/new'ed
-function SslLabsApi(hostToAnalyze){
+function SslLabsApi(hostToAnalyze, consoleDebug){
   if (!(this instanceof SslLabsApi)){
-    return new SslLabsApi(hostToAnalyze);
+    return new SslLabsApi(hostToAnalyze, consoleDebug);
   }
 
   this.options = {
@@ -29,6 +29,8 @@ function SslLabsApi(hostToAnalyze){
 
   events.EventEmitter.call(this);
   this.hostToAnalyze = hostToAnalyze;
+  this.httpReqTimeoutValueInMs = 5000;
+  debug = consoleDebug;
 }
 
 
@@ -36,75 +38,120 @@ function SslLabsApi(hostToAnalyze){
 util.inherits(SslLabsApi, events.EventEmitter);
 
 SslLabsApi.prototype.info = function(){
+  var self = this;
   this.options.path = SSL_LABS_API_V2 + '/info';
   var req = https.request(this.options, this.infoResponse.bind(this));
-  req.end();
+  req.setTimeout(this.httpReqTimeoutValueInMs, function() {
+    req.abort();
+  });
 
+  req.end();
   req.on('error', function(e){
     debugLog(e);
+    clearInterval(intervalObj);
+    self.emit('error', 'Aborting');
   });
 }
 
 
 SslLabsApi.prototype.analyzeHost = function(){
+  var self = this;
   this.options.path = SSL_LABS_API_V2 + '/analyze?host=' + this.hostToAnalyze;
+  debugLog(this.options.path);
   var req = https.request(this.options, this.analyzeResponse.bind(this));
+  req.setTimeout(this.httpReqTimeoutValueInMs, function() {
+    req.abort();
+  });
+
+
   req.end();
 
   req.on('error', function(e){
     debugLog(e);
+    clearInterval(intervalObj);
+    self.emit('error', 'Aborting');
   });
 }
 
 
 SslLabsApi.prototype.analyzeHostCached = function(){
+  var self = this;
   this.options.path = SSL_LABS_API_V2 + '/analyze?host=' + this.hostToAnalyze + '&fromCache=on&all=done';
+  debugLog(this.options.path);
   var req = https.request(this.options, this.analyzeResponse.bind(this));
+  req.setTimeout(this.httpReqTimeoutValueInMs, function() {
+    req.abort();
+  });
+
   req.end();
   this.startPoll();
 
   req.on('error', function(e){
     debugLog(e);
+    clearInterval(intervalObj);
+    self.emit('error', 'Aborting');
   });
 
-  req.on('timeout', function(e){
-    debugLog(e);
-    req.close();
-  });
+//  req.on('timeout', function(e){
+//    debugLog(e);
+//    req.close();
+//    clearInterval(intervalObj);
+//    self.emit('error', 'Aborting');
+//  });
 }
 
 
 SslLabsApi.prototype.analyzeHostNew = function(){
+  var self = this;
   debugLog('2 hostToAnalyze = ' + this.hostToAnalyze);
   this.options.path = SSL_LABS_API_V2 + '/analyze?host=' + this.hostToAnalyze + '&startNew=on&all=done';
+  debugLog(this.options.path);
   var req = https.request(this.options, this.analyzeResponse.bind(this));
+  req.setTimeout(this.httpReqTimeoutValueInMs, function() {
+    req.abort();
+  });
+
   req.end();
   this.startPoll();
 
   req.on('error', function(e){
     debugLog(e);
+    clearInterval(intervalObj);
+    self.emit('error', 'Aborting');
   });
 }
 
 
 SslLabsApi.prototype.getEndpointData = function(endpoint){
+  var self = this;
   this.options.path = SSL_LABS_API_V2 + '/getEndpointData?host=' + this.hostToAnalyze + '&s=' + endpoint;
   var req = https.request(this.options, this.endpointResponse.bind(this));
-  req.end();
+  req.setTimeout(this.httpReqTimeoutValueInMs, function() {
+    req.abort();
+  });
 
+  req.end();
   req.on('error', function(e){
-    debugLog(e);
+    console.log(e);
+    clearInterval(intervalObj);
+    self.emit('error', 'Aborting');
   });
 }
 
 
 SslLabsApi.prototype.getStatusCodes = function(){
+  var self = this;
   this.options.path = SSL_LABS_API_V2 + '/getStatusCodes';
   var req = https.request(this.options, this.statusCodesResponse.bind(this));
-  req.end();
+  req.setTimeout(this.httpReqTimeoutValueInMs, function() {
+    req.abort();
+  });
 
+  req.end();
   req.on('error', function(e){
     debugLog(e);
+    clearInterval(intervalObj);
+    self.emit('error', 'Aborting');
   });
 }
 
@@ -118,17 +165,26 @@ SslLabsApi.prototype.analyzeResponse = function(resp){
   });
 
   resp.on('end', function(){
+    debugLog(respBody);
+    if (respBody.length){
     var jsonResp = JSON.parse(respBody);
     if (jsonResp.status) {
       if(jsonResp.status === "READY"){
         self.emit('analyzeData', jsonResp);
         clearInterval(intervalObj);
         debugLog("assessment complete");
-      } else {
+      } else if((jsonResp.status === "DNS") || (jsonResp.status === "IN_PROGRESS")){
         debugLog(jsonResp.status);
+      }else{
+        clearInterval(intervalObj);
+        self.emit('error', 'Aborting');
       }
     } else {
       self.emit('endpointData', jsonResp);
+    }
+    }else{
+      clearInterval(intervalObj);
+      self.emit('error', 'Aborting');
     }
   });
 }
