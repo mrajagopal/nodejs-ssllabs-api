@@ -3,7 +3,7 @@ var nock = require('nock');
 var sslLabsApi = require('../ssllabs-api');
 var sslLabsApiUrlV2 = 'https://api.ssllabs.com/api/v2';
 
-module.exports = {
+module.exports = testCase({
   'Test Ready Response' : function(test){
     test.expect(1);
     var consoleDebug = false; 
@@ -191,5 +191,5 @@ module.exports = {
     });
     sslApi.getStatusCodes();  
   }
-}
+});
 
