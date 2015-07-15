@@ -1,9 +1,12 @@
 var async = require('async');
 var sslLabsApi = require('../ssllabs-api');
+var profiler = require('v8-profiler');
+var fs = require("fs");
+profiler.startProfiling("trace");
 
-var consoleDebug = process.argv[2] || false;
-var testhost = process.argv[2] || 'www.f5.com';
-var sslApi = sslLabsApi(testhost, consoleDebug);
+var consoleDebug = process.argv[3] || false;
+var hostToAnalyze = process.argv[2] || 'www.f5.com';
+var sslApi = sslLabsApi(hostToAnalyze, consoleDebug);
 
 
 sslApi.on('analyzeData', function(data){
@@ -16,6 +19,8 @@ sslApi.on('infoResponse', function(data){
 });
 
 sslApi.on('endpointData', function(data){
+  var profData = profiler.stopProfiling("trace");
+  fs.writeFileSync("sslLabsApi."+ hostToAnalyze + ".cpuprofile", JSON.stringify(profData));
   console.log('Received endpoints data: "' + JSON.stringify(data) + '"');
 });
 
@@ -25,10 +30,10 @@ sslApi.on('statusCodesData', function(data){
 
 sslApi.on('error', function(data){
   console.log('Received error event: ', JSON.stringify(data));
-}
+});
 
-async.series([
+//async.series([
 // sslApi.getStatusCodes(),
- sslApi.analyzeHostCached()
-]);
+sslApi.analyzeHostCached('1');
+//]);
 
