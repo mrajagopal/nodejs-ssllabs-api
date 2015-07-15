@@ -21,6 +21,9 @@ function SslLabsApi(hostToAnalyze, consoleDebug){
     return new SslLabsApi(hostToAnalyze, consoleDebug);
   }
 
+//  if(!hostToAnalyze){
+//    throw new Error('host parameter not supplied');
+//  }
   this.options = {
     host: 'api.ssllabs.com',
     method: 'GET',
@@ -72,9 +75,9 @@ SslLabsApi.prototype.analyzeHost = function(){
 }
 
 
-SslLabsApi.prototype.analyzeHostCached = function(){
+SslLabsApi.prototype.analyzeHostCached = function(maxAge){
   var self = this;
-  this.options.path = SSL_LABS_API_V2 + '/analyze?host=' + this.hostToAnalyze + '&fromCache=on&all=done';
+  this.options.path = SSL_LABS_API_V2 + '/analyze?host=' + this.hostToAnalyze + '&fromCache=on&all=done' + '&maxAge=' + maxAge;
   debugLog(this.options.path);
   var req = https.request(this.options, this.analyzeResponse.bind(this));
   req.setTimeout(this.httpReqTimeoutValueInMs, function() {
