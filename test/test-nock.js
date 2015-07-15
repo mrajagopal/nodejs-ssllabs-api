@@ -21,6 +21,33 @@ module.exports = testCase({
 
     sslApi.analyzeHostNew();  
   },
+  'Test Info() Response' : function(test){
+    test.expect(6);
+    var consoleDebug = false; 
+    var testhost = 'www.f5.com';
+    var sslApi = sslLabsApi(testhost, consoleDebug);
+
+    var sslApiReqAnalyze = nock(sslLabsApiUrlV2)
+                          .get('/info')
+                          .reply(200, {"version" : "1.1.1.1",
+                                      "criteriaVersion" : "1.1",
+                                      "maxAssessments" : "10",
+                                      "currentAssessments" : "5",
+                                      "messages" : "ok",
+                                      "clientMaxAssessments" : "2"});
+
+    sslApi.on('infoResponse', function(data){
+      test.ok(data.version);
+      test.ok(data.criteriaVersion);
+      test.ok(data.maxAssessments);
+      test.ok(data.currentAssessments);
+      test.ok(data.messages);
+      test.ok(data.clientMaxAssessments);
+      test.done();
+    });
+
+    sslApi.info();  
+  },
   'Test analyzeHostNew() Response' : function(test){
     test.expect(1);
     var consoleDebug = false; 
