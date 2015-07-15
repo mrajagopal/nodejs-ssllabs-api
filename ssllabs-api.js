@@ -126,6 +126,7 @@ SslLabsApi.prototype.getEndpointData = function(endpoint){
 
   req.end();
   req.on('error', function(e){
+    debugLog(e);
     clearInterval(intervalObj);
     self.emit('error', 'Aborting');
   });
