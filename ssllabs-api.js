@@ -3,7 +3,7 @@
 var util = require('util');
 var https = require('https');
 var SSL_LABS_API_V2 = "/api/v2";
-var intervalObj = undefined;
+var intervalObj;
 var events = require('events');
 var ANALYZE_POLL_INTERVAL = 30000;
 var debug = true;
@@ -28,7 +28,7 @@ function SslLabsApi(hostToAnalyze, consoleDebug){
     host: 'api.ssllabs.com',
     method: 'GET',
     path: '/'
-  }
+  };
 
   events.EventEmitter.call(this);
   this.hostToAnalyze = hostToAnalyze;
@@ -54,7 +54,7 @@ SslLabsApi.prototype.info = function(){
     clearInterval(intervalObj);
     self.emit('error', 'Aborting');
   });
-}
+};
 
 
 SslLabsApi.prototype.analyzeHost = function(){
@@ -72,7 +72,7 @@ SslLabsApi.prototype.analyzeHost = function(){
     clearInterval(intervalObj);
     self.emit('error', 'Aborting');
   });
-}
+};
 
 
 SslLabsApi.prototype.analyzeHostCached = function(maxAge){
@@ -92,7 +92,7 @@ SslLabsApi.prototype.analyzeHostCached = function(maxAge){
     clearInterval(intervalObj);
     self.emit('error', 'Aborting');
   });
-}
+};
 
 
 SslLabsApi.prototype.analyzeHostNew = function(){
@@ -113,7 +113,7 @@ SslLabsApi.prototype.analyzeHostNew = function(){
     clearInterval(intervalObj);
     self.emit('error', 'Aborting');
   });
-}
+};
 
 
 SslLabsApi.prototype.getEndpointData = function(endpoint){
@@ -129,7 +129,7 @@ SslLabsApi.prototype.getEndpointData = function(endpoint){
     clearInterval(intervalObj);
     self.emit('error', 'Aborting');
   });
-}
+};
 
 
 SslLabsApi.prototype.getStatusCodes = function(){
@@ -146,7 +146,7 @@ SslLabsApi.prototype.getStatusCodes = function(){
     clearInterval(intervalObj);
     self.emit('error', 'Aborting');
   });
-}
+};
 
 
 SslLabsApi.prototype.analyzeResponse = function(resp){
@@ -180,7 +180,7 @@ SslLabsApi.prototype.analyzeResponse = function(resp){
       self.emit('error', 'Aborting');
     }
   });
-}
+};
 
 SslLabsApi.prototype.endpointResponse = function(resp){
   var self = this;
@@ -194,7 +194,7 @@ SslLabsApi.prototype.endpointResponse = function(resp){
     var jsonResp = JSON.parse(respBody);
     self.emit('endpointData', jsonResp);
   });
-}
+};
 
 
 SslLabsApi.prototype.statusCodesResponse = function(resp){
@@ -209,7 +209,7 @@ SslLabsApi.prototype.statusCodesResponse = function(resp){
     var jsonResp = JSON.parse(respBody);
     self.emit('statusCodesData', jsonResp);
   });
-}
+};
 
 
 SslLabsApi.prototype.infoResponse = function(resp){
@@ -224,7 +224,7 @@ SslLabsApi.prototype.infoResponse = function(resp){
     var jsonResp = JSON.parse(respBody);
     self.emit('infoResponse', jsonResp);
   });
-}
+};
 
 
 SslLabsApi.prototype.pollAnalyzeRequest = function() {
@@ -235,18 +235,18 @@ SslLabsApi.prototype.pollAnalyzeRequest = function() {
   req.on('error', function(e){
     debugLog(e);
   });
-}
+};
 
 
 SslLabsApi.prototype.startPoll = function(){
   debugLog('4 hostToAnalyze = ' + this.hostToAnalyze);
   intervalObj = setInterval(this.pollAnalyzeRequest.bind(this), ANALYZE_POLL_INTERVAL);
-}
+};
 
 
 SslLabsApi.prototype.getEndpointIpAddr = function(data) {
   return data.endpoints[0].ipAddress;
-}
+};
 
 
 module.exports = SslLabsApi;
