@@ -1,3 +1,4 @@
+<a href="https://codeclimate.com/github/mrajagopal/nodejs-ssllabs-api"><img src="https://codeclimate.com/github/mrajagopal/nodejs-ssllabs-api/badges/gpa.svg" /></a>
 # nodejs-ssllabs-api
 Node.js library to fetch data from SSL Labs API
 
