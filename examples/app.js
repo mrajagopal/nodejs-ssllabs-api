@@ -1,4 +1,3 @@
-var async = require('async');
 var sslLabsApi = require('../ssllabs-api');
 var profiler = require('v8-profiler');
 var fs = require("fs");

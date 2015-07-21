@@ -51,7 +51,6 @@ SslLabsApi.prototype._emitError = function _emitError(e){
 
 
 SslLabsApi.prototype.info = function info(){
-  var self = this;
   this.options.path = SSL_LABS_API_V2 + '/info';
   var req = https.request(this.options, this.infoResponse.bind(this));
   req.setTimeout(this.httpReqTimeoutValueInMs, function() {
