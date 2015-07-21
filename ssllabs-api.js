@@ -21,9 +21,11 @@ function SslLabsApi(hostToAnalyze, consoleDebug){
     return new SslLabsApi(hostToAnalyze, consoleDebug);
   }
 
-//  if(!hostToAnalyze){
-//    throw new Error('host parameter not supplied');
-//  }
+  if(!hostToAnalyze){
+    throw new TypeError('host parameter not supplied');
+//    this.emit('error', 'host parameter not supplied');
+  }
+
   this.options = {
     host: 'api.ssllabs.com',
     method: 'GET',
@@ -34,13 +36,21 @@ function SslLabsApi(hostToAnalyze, consoleDebug){
   this.hostToAnalyze = hostToAnalyze;
   this.httpReqTimeoutValueInMs = 5000;
   debug = consoleDebug;
-}
 
+}
 
 // extent the SslLabsApi object using EventEmitter
 util.inherits(SslLabsApi, events.EventEmitter);
 
-SslLabsApi.prototype.info = function(){
+
+SslLabsApi.prototype._emitError = function _emitError(e){
+  debugLog(e);
+  clearInterval(intervalObj);
+  this.emit('error', 'Aborting');
+};
+
+
+SslLabsApi.prototype.info = function info(){
   var self = this;
   this.options.path = SSL_LABS_API_V2 + '/info';
   var req = https.request(this.options, this.infoResponse.bind(this));
@@ -49,11 +59,7 @@ SslLabsApi.prototype.info = function(){
   });
 
   req.end();
-  req.on('error', function(e){
-    debugLog(e);
-    clearInterval(intervalObj);
-    self.emit('error', 'Aborting');
-  });
+  req.on('error', this._emitError);
 };
 
 
