@@ -3,7 +3,7 @@ var profiler = require('v8-profiler');
 var fs = require("fs");
 profiler.startProfiling("trace");
 
-var consoleDebug = process.argv[3] || false;
+var consoleDebug = (process.argv[3] === 'true') ? true : false;
 var hostToAnalyze = process.argv[2] || 'www.f5.com';
 var sslApi = sslLabsApi(hostToAnalyze, consoleDebug);
 

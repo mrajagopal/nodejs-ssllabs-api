@@ -36,7 +36,6 @@ function SslLabsApi(hostToAnalyze, consoleDebug){
   this.hostToAnalyze = hostToAnalyze;
   this.httpReqTimeoutValueInMs = 5000;
   debug = consoleDebug;
-
 }
 
 // extent the SslLabsApi object using EventEmitter
@@ -57,8 +56,8 @@ SslLabsApi.prototype.info = function info(){
     req.abort();
   });
 
+  req.on('error', this._emitError.bind(this));
   req.end();
-  req.on('error', this._emitError);
 };
 
 
@@ -71,12 +70,8 @@ SslLabsApi.prototype.analyzeHost = function analyzeHost(){
     req.abort();
   });
 
+  req.on('error', this._emitError.bind(this));
   req.end();
-  req.on('error', function(e){
-    debugLog(e);
-    clearInterval(intervalObj);
-    self.emit('error', 'Aborting');
-  });
 };
 
 
@@ -85,20 +80,29 @@ SslLabsApi.prototype.analyzeHostCached = function analyzeHostCached(maxAge){
   this.options.path = SSL_LABS_API_V2 + '/analyze?host=' + this.hostToAnalyze + '&fromCache=on&all=done' + '&maxAge=' + maxAge;
   debugLog(this.options.path);
   var req = https.request(this.options, this.analyzeResponse.bind(this));
-  req.setTimeout(this.httpReqTimeoutValueInMs, function() {
-    req.abort();
-  });
 
+  function handleTimeout(){
+    debugLog('Request timed out');
+    clearInterval(intervalObj);
+    req.abort();
+  }
+
+  req.setTimeout(this.httpReqTimeoutValueInMs, handleTimeout);
   req.end();
   this.startPoll();
 
-  req.on('error', function(e){
-    debugLog(e);
-    clearInterval(intervalObj);
-    self.emit('error', 'Aborting');
-  });
+ req.on('error', this._emitError.bind(this));
 };
 
+
+//SslLabsApi.prototype.handleTimeout = function handleTimeout(req) {
+//  console.log('setTimeout callback invoked');
+//  // self._emitError('Request timed out');
+//  debugLog('proto Request timed out');
+//  clearInterval(intervalObj);
+////  this.emit('error', 'Aborting');
+//  req.abort();
+//};
 
 SslLabsApi.prototype.analyzeHostNew = function analyzeHostNew(){
   var self = this;
@@ -106,52 +110,49 @@ SslLabsApi.prototype.analyzeHostNew = function analyzeHostNew(){
   this.options.path = SSL_LABS_API_V2 + '/analyze?host=' + this.hostToAnalyze + '&startNew=on&all=done';
   debugLog(this.options.path);
   var req = https.request(this.options, this.analyzeResponse.bind(this));
-  req.setTimeout(this.httpReqTimeoutValueInMs, function() {
-    req.abort();
-  });
 
+  function handleTimeout(){
+    debugLog('Request timed out');
+    clearInterval(intervalObj);
+    req.abort();
+  }
+
+  req.setTimeout(this.httpReqTimeoutValueInMs, handleTimeout);
+  req.on('error', this._emitError.bind(this));
   req.end();
   this.startPoll();
-
-  req.on('error', function(e){
-    debugLog(e);
-    clearInterval(intervalObj);
-    self.emit('error', 'Aborting');
-  });
 };
-
 
 SslLabsApi.prototype.getEndpointData = function getEndpointData(endpoint){
   var self = this;
   this.options.path = SSL_LABS_API_V2 + '/getEndpointData?host=' + this.hostToAnalyze + '&s=' + endpoint;
   var req = https.request(this.options, this.endpointResponse.bind(this));
-  req.setTimeout(this.httpReqTimeoutValueInMs, function() {
-    req.abort();
-  });
 
-  req.end();
-  req.on('error', function(e){
-    debugLog(e);
+  function handleTimeout(){
+    debugLog('Request timed out');
     clearInterval(intervalObj);
-    self.emit('error', 'Aborting');
-  });
-};
+    req.abort();
+  }
 
+  req.setTimeout(this.httpReqTimeoutValueInMs, handleTimeout);
+  req.on('error', this._emitError.bind(this));
+  req.end();
+};
 
 SslLabsApi.prototype.getStatusCodes = function getStatusCodes(){
   var self = this;
   this.options.path = SSL_LABS_API_V2 + '/getStatusCodes';
   var req = https.request(this.options, this.statusCodesResponse.bind(this));
-  req.setTimeout(this.httpReqTimeoutValueInMs, function() {
-    req.abort();
-  });
 
-  req.end();
-  req.on('error', function(e){
-    debugLog(e);
+  function handleTimeout(){
+    debugLog('Request timed out');
     clearInterval(intervalObj);
-    self.emit('error', 'Aborting');
-  });
+    req.abort();
+  }
+
+  req.setTimeout(this.httpReqTimeoutValueInMs, handleTimeout);
+  req.end();
+  req.on('error', this._emitError.bind(this));
 };
 
 
@@ -161,6 +162,10 @@ SslLabsApi.prototype.analyzeResponse = function analyzeResponse(resp){
 
   resp.on('data', function (chunk){
     respBody += chunk;
+  });
+
+  resp.on('Error', function(e){
+    console.log('This is the error dump', e);
   });
 
   resp.on('end', function(){
@@ -234,13 +239,19 @@ SslLabsApi.prototype.infoResponse = function infoResponse(resp){
 
 
 SslLabsApi.prototype.pollAnalyzeRequest = function pollAnalyzeRequest() {
+  var self = this;
   this.options.path = SSL_LABS_API_V2 + '/analyze?host=' + this.hostToAnalyze;
   var req = https.request(this.options, this.analyzeResponse.bind(this));
-  req.end();
 
-  req.on('error', function(e){
-    debugLog(e);
-  });
+  function handleTimeout(){
+    debugLog('Request timed out');
+    clearInterval(intervalObj);
+    req.abort();
+  }
+
+  req.setTimeout(this.httpReqTimeoutValueInMs, handleTimeout);
+  req.on('error', this._emitError.bind(this));
+  req.end();
 };
 
 

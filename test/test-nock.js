@@ -6,35 +6,35 @@ var sslLabsApiUrlV2 = 'https://api.ssllabs.com/api/v2';
 module.exports = testCase({
   'Test Ready Response' : function(test){
     test.expect(1);
-    var consoleDebug = false; 
+    var consoleDebug = false;
     var testhost = 'www.f5.com';
     var sslApi = sslLabsApi(testhost, consoleDebug);
 
-    var sslApiReqAnalyze = nock(sslLabsApiUrlV2) 
-                          .get('/analyze?host=' + testhost + '&startNew=on&all=done')
-                          .reply(200, {"status" : "READY"});
+    nock(sslLabsApiUrlV2)
+      .get('/analyze?host=' + testhost + '&startNew=on&all=done')
+      .reply(200, {"status" : "READY"});
 
     sslApi.on('analyzeData', function(data){
       test.strictEqual(data.status, "READY");
       test.done();
     });
 
-    sslApi.analyzeHostNew();  
+    sslApi.analyzeHostNew();
   },
   'Test Info() Response' : function(test){
     test.expect(6);
-    var consoleDebug = false; 
+    var consoleDebug = false;
     var testhost = 'www.f5.com';
     var sslApi = sslLabsApi(testhost, consoleDebug);
 
-    var sslApiReqAnalyze = nock(sslLabsApiUrlV2)
-                          .get('/info')
-                          .reply(200, {"version" : "1.1.1.1",
-                                      "criteriaVersion" : "1.1",
-                                      "maxAssessments" : "10",
-                                      "currentAssessments" : "5",
-                                      "messages" : "ok",
-                                      "clientMaxAssessments" : "2"});
+    nock(sslLabsApiUrlV2)
+      .get('/info')
+      .reply(200, {"version" : "1.1.1.1",
+                   "criteriaVersion" : "1.1",
+                   "maxAssessments" : "10",
+                   "currentAssessments" : "5",
+                   "messages" : "ok",
+                   "clientMaxAssessments" : "2"});
 
     sslApi.on('infoResponse', function(data){
       test.ok(data.version);
@@ -46,25 +46,25 @@ module.exports = testCase({
       test.done();
     });
 
-    sslApi.info();  
+    sslApi.info();
   },
   'Test analyzeHostNew() Response' : function(test){
     test.expect(1);
-    var consoleDebug = false; 
+    var consoleDebug = false;
     var testhost = 'www.f5.com';
     var sslApi = sslLabsApi(testhost, consoleDebug);
 
-    var sslApiReqAnalyzeDns = nock(sslLabsApiUrlV2)
-                          .get('/analyze?host=' + testhost + '&startNew=on&all=done')
-                          .reply(200, {"status" : "DNS"});
+    nock(sslLabsApiUrlV2)
+      .get('/analyze?host=' + testhost + '&startNew=on&all=done')
+      .reply(200, {"status" : "DNS"});
 
-    var sslApiReqAnalyzePoll = nock(sslLabsApiUrlV2)
-                          .get('/analyze?host=www.f5.com')
-                          .reply(200, {"status" : "IN_PROGRESS"});
+    nock(sslLabsApiUrlV2)
+      .get('/analyze?host=www.f5.com')
+      .reply(200, {"status" : "IN_PROGRESS"});
 
-    var sslApiReqAnalyzeReady = nock(sslLabsApiUrlV2)
-                          .get('/analyze?host=www.f5.com')
-                          .reply(200, {"status" : "READY"});
+    nock(sslLabsApiUrlV2)
+      .get('/analyze?host=www.f5.com')
+      .reply(200, {"status" : "READY"});
 
 
     sslApi.on('analyzeData', function(data){
@@ -72,34 +72,35 @@ module.exports = testCase({
       test.done();
     });
 
-    sslApi.analyzeHostNew();  
+    sslApi.analyzeHostNew();
   },
   'Test AnalyzeHostCached() Response' : function(test){
     test.expect(1);
-    var consoleDebug = false; 
+    var consoleDebug = false;
     var testhost = 'www.f5.com';
+    var maxAge = '1';
     var sslApi = sslLabsApi(testhost, consoleDebug);
 
-    var sslApiReqAnalyze = nock(sslLabsApiUrlV2)
-                          .get('/analyze?host=' + testhost + '&fromCache=on&all=done')
-                          .reply(200, {"status" : "READY"});
+    nock(sslLabsApiUrlV2)
+      .get('/analyze?host=' + testhost + '&fromCache=on&all=done&maxAge=' + maxAge)
+      .reply(200, {"status" : "READY"});
 
     sslApi.on('analyzeData', function(data){
       test.strictEqual(data.status, "READY");
       test.done();
     });
 
-    sslApi.analyzeHostCached();  
+    sslApi.analyzeHostCached(maxAge);
   },
   'Test analyzeHostNew() Unrecognized Response' : function(test){
     test.expect(1);
-    var consoleDebug = false; 
+    var consoleDebug = false;
     var testhost = 'www.f5.com';
     var sslApi = sslLabsApi(testhost, consoleDebug);
 
-    var sslApiReqAnalyzeUnrecognized = nock(sslLabsApiUrlV2)
-                                      .get('/analyze?host=' + testhost + '&startNew=on&all=done')
-                                      .reply(200, {"status" : "UNKNOWN"});
+    nock(sslLabsApiUrlV2)
+      .get('/analyze?host=' + testhost + '&startNew=on&all=done')
+      .reply(200, {"status" : "UNKNOWN"});
 
     sslApi.on('analyzeData', function(data){
       test.strictEqual(data.status, "READY");
@@ -110,17 +111,17 @@ module.exports = testCase({
       test.strictEqual(data, "Aborting");
       test.done();
     });
-    sslApi.analyzeHostNew();  
+    sslApi.analyzeHostNew();
   },
   'Test analyzeHostNew() Incomplete Response' : function(test){
     test.expect(1);
-    var consoleDebug = false; 
+    var consoleDebug = false;
     var testhost = 'www.f5.com';
     var sslApi = sslLabsApi(testhost, consoleDebug);
 
-    var sslApiReqAnalyzeNew = nock(sslLabsApiUrlV2)
-                              .get('/analyze?host=' + testhost + '&startNew=on&all=done')
-                              .reply(200);
+    nock(sslLabsApiUrlV2)
+      .get('/analyze?host=' + testhost + '&startNew=on&all=done')
+      .reply(200);
 
     sslApi.on('analyzeData', function(data){
       test.strictEqual(data.status, "READY");
@@ -131,92 +132,87 @@ module.exports = testCase({
       test.strictEqual(data, "Aborting");
       test.done();
     });
-    sslApi.analyzeHostNew();  
+    sslApi.analyzeHostNew();
   },
   'Test analyzeHostNew() HTTP Request Error' : function(test){
     test.expect(1);
-    var consoleDebug = false; 
+    var consoleDebug = true;
     var testhost = 'www.f5.com';
     var sslApi = sslLabsApi(testhost, consoleDebug);
 
-    var sslApiReqAnalyzeNew = nock(sslLabsApiUrlV2)
-                              .get('/analyze?host=' + testhost + '&startNew=on&all=done')
-                              .socketDelay(6000)
-                              .reply(200, {"status" : "READY"});
-
-    sslApi.on('error', function(data){
+    function handleError(data){
       test.strictEqual(data, "Aborting");
       test.done();
-    });
-    sslApi.analyzeHostNew();  
-  },
-  'Test analyzeHostNew() HTTP Request Error' : function(test){
-    test.expect(1);
-    var consoleDebug = false; 
-    var testhost = 'www.f5.com';
-    var sslApi = sslLabsApi(testhost, consoleDebug);
+    }
 
-    var sslApiReqAnalyzeNew = nock(sslLabsApiUrlV2)
-                              .get('/analyze?host=' + testhost + '&startNew=on&all=done')
-                              .socketDelay(6000)
-                              .reply(200, {"status" : "READY"});
+    nock(sslLabsApiUrlV2)
+      .get('/analyze?host=' + testhost + '&startNew=on&all=done')
+      .socketDelay(6000)
+      .reply(200, {"status" : "READY"});
 
-    sslApi.on('error', function(data){
-      test.strictEqual(data, "Aborting");
-      test.done();
-    });
-    sslApi.analyzeHostNew();  
+    sslApi.on('error', handleError);
+
+    sslApi.analyzeHostNew();
   },
   'Test analyzeHostCached() HTTP Request Error' : function(test){
     test.expect(1);
-    var consoleDebug = false; 
+    var consoleDebug = false;
     var testhost = 'www.f5.com';
+    var maxAge = '1';
     var sslApi = sslLabsApi(testhost, consoleDebug);
 
-    var sslApiReqAnalyzedHostCached = nock(sslLabsApiUrlV2)
-                          .get('/analyze?host=' + testhost + '&fromCache=on&all=done')
-                          .socketDelay(6000)
-                          .reply(200, {"status" : "READY"});
-
-    sslApi.on('error', function(data){
+    function handleError(data){
       test.strictEqual(data, "Aborting");
       test.done();
-    });
-    sslApi.analyzeHostCached();  
+    }
+
+    nock(sslLabsApiUrlV2)
+      .get('/analyze?host=' + testhost + '&fromCache=on&all=done&maxAge=' + maxAge)
+      .socketDelay(6000)
+      .reply(200, {"status" : "READY"});
+
+    sslApi.on('error', handleError);
+
+    sslApi.analyzeHostCached(maxAge);
   },
   'Test getEndpointData() HTTP Request Error' : function(test){
     test.expect(1);
-    var consoleDebug = false; 
+    var consoleDebug = false;
     var testhost = 'www.f5.com';
     var sslApi = sslLabsApi(testhost, consoleDebug);
     var endpoint = '1.2.3.4';
-    var sslApiReqGetEndpointData = nock(sslLabsApiUrlV2)
-                          .get('/getEndpointData?host=' + testhost + '&s='+endpoint)
-                          .socketDelay(6000)
-                          .reply(200, {"status" : "READY"});
 
-    sslApi.on('error', function(data){
+    function handleError(data){
       test.strictEqual(data, "Aborting");
       test.done();
-    });
-    sslApi.getEndpointData(endpoint);  
+    }
+
+    nock(sslLabsApiUrlV2)
+      .get('/getEndpointData?host=' + testhost + '&s='+endpoint)
+      .socketDelay(6000)
+      .reply(200, {"status" : "READY"});
+
+    sslApi.on('error', handleError);
+    sslApi.getEndpointData(endpoint);
+
   },
    'Test getStatusCodes() HTTP Request Error' : function(test){
     test.expect(1);
-    var consoleDebug = false; 
+    var consoleDebug = false;
     var testhost = 'www.f5.com';
     var sslApi = sslLabsApi(testhost, consoleDebug);
 
-    var sslApiReqGetStatusCodes = nock(sslLabsApiUrlV2)
-                                    .get('/getStatusCodes')
-                                    .socketDelay(6000)
-                                    .reply(200, {"status" : "READY"});
- 
-    sslApi.on('error', function(data){
+    function handleError(data){
       test.strictEqual(data, "Aborting");
       test.done();
-    });
-    sslApi.getStatusCodes();  
+    }
+
+    nock(sslLabsApiUrlV2)
+      .get('/getStatusCodes')
+      .socketDelay(6000)
+      .reply(200, {"status" : "READY"});
+
+    sslApi.on('error', handleError);
+    sslApi.getStatusCodes();
   }
 });
-
