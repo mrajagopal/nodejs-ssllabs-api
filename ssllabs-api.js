@@ -62,7 +62,6 @@ SslLabsApi.prototype.info = function info(){
 
 
 SslLabsApi.prototype.analyzeHost = function analyzeHost(){
-  var self = this;
   this.options.path = SSL_LABS_API_V2 + '/analyze?host=' + this.hostToAnalyze;
   debugLog(this.options.path);
   var req = https.request(this.options, this.analyzeResponse.bind(this));
@@ -76,7 +75,6 @@ SslLabsApi.prototype.analyzeHost = function analyzeHost(){
 
 
 SslLabsApi.prototype.analyzeHostCached = function analyzeHostCached(maxAge){
-  var self = this;
   this.options.path = SSL_LABS_API_V2 + '/analyze?host=' + this.hostToAnalyze + '&fromCache=on&all=done' + '&maxAge=' + maxAge;
   debugLog(this.options.path);
   var req = https.request(this.options, this.analyzeResponse.bind(this));
@@ -94,18 +92,7 @@ SslLabsApi.prototype.analyzeHostCached = function analyzeHostCached(maxAge){
  req.on('error', this._emitError.bind(this));
 };
 
-
-//SslLabsApi.prototype.handleTimeout = function handleTimeout(req) {
-//  console.log('setTimeout callback invoked');
-//  // self._emitError('Request timed out');
-//  debugLog('proto Request timed out');
-//  clearInterval(intervalObj);
-////  this.emit('error', 'Aborting');
-//  req.abort();
-//};
-
 SslLabsApi.prototype.analyzeHostNew = function analyzeHostNew(){
-  var self = this;
   debugLog('2 hostToAnalyze = ' + this.hostToAnalyze);
   this.options.path = SSL_LABS_API_V2 + '/analyze?host=' + this.hostToAnalyze + '&startNew=on&all=done';
   debugLog(this.options.path);
@@ -124,7 +111,6 @@ SslLabsApi.prototype.analyzeHostNew = function analyzeHostNew(){
 };
 
 SslLabsApi.prototype.getEndpointData = function getEndpointData(endpoint){
-  var self = this;
   this.options.path = SSL_LABS_API_V2 + '/getEndpointData?host=' + this.hostToAnalyze + '&s=' + endpoint;
   var req = https.request(this.options, this.endpointResponse.bind(this));
 
@@ -140,7 +126,6 @@ SslLabsApi.prototype.getEndpointData = function getEndpointData(endpoint){
 };
 
 SslLabsApi.prototype.getStatusCodes = function getStatusCodes(){
-  var self = this;
   this.options.path = SSL_LABS_API_V2 + '/getStatusCodes';
   var req = https.request(this.options, this.statusCodesResponse.bind(this));
 
