@@ -74,6 +74,37 @@ module.exports = testCase({
 
     sslApi.analyzeHostNew();
   },
+  'Test analyzeHostNew() Response Error' : function(test){
+    test.expect(1);
+    var consoleDebug = false;
+    var testhost = 'www.f5.com';
+    var sslApi = sslLabsApi(testhost, consoleDebug);
+
+    nock(sslLabsApiUrlV2)
+      .get('/analyze?host=' + testhost + '&startNew=on&all=done')
+      .reply(200, {"status" : "DNS"});
+
+    nock(sslLabsApiUrlV2)
+      .get('/analyze?host=www.f5.com')
+      .reply(200, {"status" : "IN_PROGRESS"});
+
+    nock(sslLabsApiUrlV2)
+      .get('/analyze?host=www.f5.com')
+      .reply(200, {"status" : "RUBBISH"});
+
+
+    sslApi.on('analyzeData', function(data){
+      test.strictEqual(data.status, "READY");
+      test.done();
+    });
+
+    sslApi.on('error', function(data){
+      test.strictEqual(data, "Aborting");
+      test.done();
+    });
+
+    sslApi.analyzeHostNew();
+  },
   'Test AnalyzeHostCached() Response' : function(test){
     test.expect(1);
     var consoleDebug = false;
@@ -123,20 +154,15 @@ module.exports = testCase({
       .get('/analyze?host=' + testhost + '&startNew=on&all=done')
       .reply(200);
 
-    sslApi.on('analyzeData', function(data){
-      test.strictEqual(data.status, "READY");
-      test.done();
-    });
-
     sslApi.on('error', function(data){
       test.strictEqual(data, "Aborting");
       test.done();
     });
     sslApi.analyzeHostNew();
   },
-  'Test analyzeHostNew() HTTP Request Error' : function(test){
+  'Test analyzeHostNew() HTTP Request Timeout Error' : function(test){
     test.expect(1);
-    var consoleDebug = true;
+    var consoleDebug = false;
     var testhost = 'www.f5.com';
     var sslApi = sslLabsApi(testhost, consoleDebug);
 
@@ -154,7 +180,7 @@ module.exports = testCase({
 
     sslApi.analyzeHostNew();
   },
-  'Test analyzeHostCached() HTTP Request Error' : function(test){
+  'Test analyzeHostCached() HTTP Request Timeout Error' : function(test){
     test.expect(1);
     var consoleDebug = false;
     var testhost = 'www.f5.com';
@@ -175,7 +201,7 @@ module.exports = testCase({
 
     sslApi.analyzeHostCached(maxAge);
   },
-  'Test getEndpointData() HTTP Request Error' : function(test){
+  'Test getEndpointData() HTTP Request Timeout Error' : function(test){
     test.expect(1);
     var consoleDebug = false;
     var testhost = 'www.f5.com';
@@ -196,7 +222,7 @@ module.exports = testCase({
     sslApi.getEndpointData(endpoint);
 
   },
-   'Test getStatusCodes() HTTP Request Error' : function(test){
+   'Test getStatusCodes() HTTP Request Timeout Error' : function(test){
     test.expect(1);
     var consoleDebug = false;
     var testhost = 'www.f5.com';

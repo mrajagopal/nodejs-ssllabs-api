@@ -156,24 +156,22 @@ SslLabsApi.prototype.analyzeResponse = function analyzeResponse(resp){
   resp.on('end', function(){
     debugLog(respBody);
     if (respBody.length){
-    var jsonResp = JSON.parse(respBody);
-    if (jsonResp.status) {
-      if(jsonResp.status === "READY"){
-        self.emit('analyzeData', jsonResp);
-        clearInterval(intervalObj);
-        debugLog("assessment complete");
-      } else if((jsonResp.status === "DNS") || (jsonResp.status === "IN_PROGRESS")){
-        debugLog(jsonResp.status);
-      }else{
-        clearInterval(intervalObj);
-        self.emit('error', 'Aborting');
+      var jsonResp = JSON.parse(respBody);
+      if (jsonResp.status) {
+        if(jsonResp.status === "READY"){
+          self.emit('analyzeData', jsonResp);
+          clearInterval(intervalObj);
+          debugLog("assessment complete");
+        } else if((jsonResp.status === "DNS") || (jsonResp.status === "IN_PROGRESS")){
+          debugLog(jsonResp.status);
+        }else{
+          self._emitError('Unknown Response Received');
+        }
+      } else {
+        self.emit('endpointData', jsonResp);
       }
-    } else {
-      self.emit('endpointData', jsonResp);
-    }
     }else{
-      clearInterval(intervalObj);
-      self.emit('error', 'Aborting');
+      self._emitError('No Response Body Received');
     }
   });
 };
@@ -224,7 +222,6 @@ SslLabsApi.prototype.infoResponse = function infoResponse(resp){
 
 
 SslLabsApi.prototype.pollAnalyzeRequest = function pollAnalyzeRequest() {
-  var self = this;
   this.options.path = SSL_LABS_API_V2 + '/analyze?host=' + this.hostToAnalyze;
   var req = https.request(this.options, this.analyzeResponse.bind(this));
 
