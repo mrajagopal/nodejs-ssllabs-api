@@ -32,7 +32,8 @@ sslApi.on('error', function(data){
 });
 
 //async.series([
-// sslApi.getStatusCodes(),
+//sslApi.info();
+//sslApi.getStatusCodes();
 sslApi.analyzeHostCached('1');
 //]);
 
