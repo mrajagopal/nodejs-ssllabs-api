@@ -176,48 +176,32 @@ SslLabsApi.prototype.analyzeResponse = function analyzeResponse(resp){
   });
 };
 
-SslLabsApi.prototype.endpointResponse = function endpointResponse(resp){
-  var self = this;
+function processResponse(obj, resp, eventType){
+  var self = obj;
   var respBody = '';
-
   resp.on('data', function (chunk){
     respBody += chunk;
   });
 
   resp.on('end', function(){
     var jsonResp = JSON.parse(respBody);
-    self.emit('endpointData', jsonResp);
+    self.emit(eventType, jsonResp);
   });
+}
+
+
+SslLabsApi.prototype.endpointResponse = function endpointResponse(resp){
+  processResponse(this, resp, 'endpointData');
 };
 
 
 SslLabsApi.prototype.statusCodesResponse = function statusCodesResponse(resp){
-  var self = this;
-  var respBody = '';
-
-  resp.on('data', function (chunk){
-    respBody += chunk;
-  });
-
-  resp.on('end', function(){
-    var jsonResp = JSON.parse(respBody);
-    self.emit('statusCodesData', jsonResp);
-  });
+  processResponse(this, resp, 'statusCodesData');
 };
 
 
 SslLabsApi.prototype.infoResponse = function infoResponse(resp){
-  var self = this;
-  var respBody = '';
-
-  resp.on('data', function (chunk){
-    respBody += chunk;
-  });
-
-  resp.on('end', function(){
-    var jsonResp = JSON.parse(respBody);
-    self.emit('infoResponse', jsonResp);
-  });
+  processResponse(this, resp, 'infoResponse');
 };
 
 
