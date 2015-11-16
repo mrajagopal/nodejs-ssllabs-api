@@ -3,7 +3,7 @@ var testCase  = require('nodeunit').testCase;
 var sslLabsApi = require('../ssllabs-api');
 
 
-var consoleDebug = true; 
+var consoleDebug = false; 
 var testhost = 'www.f5.com';
 var analyzeData = undefined;
 var sslApi = sslLabsApi(testhost, consoleDebug);
@@ -24,7 +24,7 @@ module.exports = {
       test.expect(8);
       sslApi.on('infoResponse', function(data){
         test.notStrictEqual(data, undefined, "Info Response object is not null");
-        test.strictEqual(data.engineVersion, "1.18.1", "The version is 1.18.1");
+        test.strictEqual(data.engineVersion, "1.20.28", "The version is 1.20.28");
         test.notStrictEqual(data.engineVersion, undefined);
         test.notStrictEqual(data.criteriaVersion, undefined);
         test.notStrictEqual(data.maxAssessments, undefined);
@@ -52,7 +52,7 @@ module.exports = {
           analyzeData = data;
           test.done();
         });
-        sslApi.analyzeHostCached();
+        sslApi.analyzeHostCached('1');
     },
     'Test Endpoint Data' : function(test){
         test.expect(2);
