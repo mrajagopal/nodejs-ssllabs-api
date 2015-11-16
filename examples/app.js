@@ -1,10 +1,13 @@
 var sslLabsApi = require('../ssllabs-api');
 var profiler = require('v8-profiler');
 var fs = require("fs");
+var supportedApiCmds = ['info', 'analyzeHost', 'analyzeHostCached', 'analyzeHostNew', 'getStatusCodes'];
 profiler.startProfiling("trace");
 
-var consoleDebug = (process.argv[3] === 'true') ? true : false;
 var hostToAnalyze = process.argv[2] || 'www.f5.com';
+var consoleDebug = (process.argv[3] === 'true') ? true : false;
+var apiCommand = process.argv[4];
+var apiCommandInputs = process.argv[5];
 var sslApi = sslLabsApi(hostToAnalyze, consoleDebug);
 
 
@@ -31,9 +34,11 @@ sslApi.on('error', function(data){
   console.log('Received error event: ', JSON.stringify(data));
 });
 
-//async.series([
-//sslApi.info();
-//sslApi.getStatusCodes();
-sslApi.analyzeHostCached('1');
-//]);
+if(supportedApiCmds.indexOf(apiCommand) !== -1){
+  sslApi[apiCommand](apiCommandInputs); 
+}
+else{
+  console.log('Unsupported SSL Labs API command: ', apiCommand);
+  console.log('Supported v2 API commands: ', supportedApiCmds.toString());
+}
 
