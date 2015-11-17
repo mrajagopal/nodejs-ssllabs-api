@@ -14,16 +14,10 @@ function debugLog(log){
   }
 }
 
-
 // Instantiate if one not already created/new'ed
 function SslLabsApi(hostToAnalyze, consoleDebug){
   if (!(this instanceof SslLabsApi)){
     return new SslLabsApi(hostToAnalyze, consoleDebug);
-  }
-
-  if(!hostToAnalyze){
-    throw new TypeError('host parameter not supplied');
-//    this.emit('error', 'host parameter not supplied');
   }
 
   this.options = {
