@@ -1,43 +1,57 @@
+#!/usr/bin/env node
+
+
 var sslLabsApi = require('../ssllabs-api');
-var profiler = require('v8-profiler');
+var SegfaultHandler = require('segfault-handler');
 var fs = require("fs");
 var program = require('commander');
-var supportedApiCmds = ['info', 'analyzeHost', 'analyzeHostCached', 'analyzeHostNew', 'getStatusCodes'];
-var supportedApiHostCmds = ['analyzeHost', 'analyzeHostCached', 'analyzeHostNew'];
-var supportedApiNonHostCmds = ['info', 'getStatusCodes'];
-var cmdsReqArgs = ['analyzeHostCached'];
-profiler.startProfiling("trace");
+var validator = require('validator');
 
+// With no argument, SegfaultHandler will generate a generic log file name
+SegfaultHandler.registerHandler("crash.log"); 
 
-program.version('0.0.1');
+function getVersion(){
+  var sslApi = sslLabsApi('', false);
+  return sslApi.version();
+};
+
+program.version(getVersion());
 program.description('Command line tool for SSL Labs API using Node.js');
-program.option('-v, --verbose', 'Enable verbose logging');
-program.option('-hn, --host <hostname>', 'Hostname to analyze');
-program.option('-c, --command <cmd>', 'API command to invoke');
-program.option('-a, --argsToCmd <args>', 'arguments to the API command if applicable');
+program.option('--verbosity', 'Enable verbose logging');
+program.option('--host <hostname>', 'Hostname to analyze');
+program.option('--grade', 'Output only the hostname: grade');
+program.option('--info', 'API command info');
+program.option('--codes', 'Get API status codes');
+program.option('-u, --usecache', 'Accept cached results (if available), else force live scan');
 program.parse(process.argv);
 
 if(!process.argv.slice(2).length){
   program.help();
 }
 
-if (program.verbose){
-  console.log('Host: ', program.host);
-  console.log('Cmd: ', program.command);
-  console.log('Args: ', program.argsToCmd);
+if(program.info){
+  var sslApi = sslLabsApi('', program.verbose);
+  sslApi.info(); 
+}
+else if(program.codes){
+  var sslApi = sslLabsApi('', program.verbose);
+  sslApi.getStatusCodes(); 
+}
+else if(program.host && !validator.isFQDN(program.host)){
+  console.log('  Error: invalid host string');
+  program.help();
+  process.exit(0);
 }
 
-if(!program.host && (supportedApiHostCmds.indexOf(program.command) !== -1)){
-  console.log('\r\n  Error: Please provide a host to analyze ');
-  program.help();
-}
-else if(supportedApiNonHostCmds.indexOf(program.command) !== -1){
-  var sslApi = sslLabsApi('', program.verbose);
-  sslApi[program.command](program.argsToCmd); 
-}
-else{
+// Assume some defaults if only hostname is provided
+if(program.host){
   var sslApi = sslLabsApi(program.host, program.verbose);
-  sslApi[program.command](program.argsToCmd); 
+  if(program.usecache){
+    sslApi.analyzeHostCached();
+  }
+  else{
+    sslApi.analyzeHostNew();
+  }
 }
 
 sslApi.on('analyzeData', function(data){
@@ -50,8 +64,6 @@ sslApi.on('infoResponse', function(data){
 });
 
 sslApi.on('endpointData', function(data){
-  var profData = profiler.stopProfiling("trace");
-  fs.writeFileSync("sslLabsApi."+ program.host + ".cpuprofile", JSON.stringify(profData));
   console.log('Received endpoints data: "' + JSON.stringify(data) + '"');
 });
 

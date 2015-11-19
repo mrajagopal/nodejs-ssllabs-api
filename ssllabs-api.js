@@ -1,12 +1,18 @@
+#!/usr/bin/env node
+
+
 "use strict";
 
 var util = require('util');
 var https = require('https');
-var SSL_LABS_API_V2 = "/api/v2";
+var apiVersionPath = "/api/v2";
 var intervalObj;
 var events = require('events');
 var ANALYZE_POLL_INTERVAL = 30000;
 var debug = true;
+var apiHost = 'api.ssllabs.com';
+var apiLocation = 'https://' + apiHost + apiVersionPath;
+var userAgent = "nodejs-ssllabs-api v0.0.1 (dev $Id$)";
 
 function debugLog(log){
   if (debug === true){
@@ -21,7 +27,7 @@ function SslLabsApi(hostToAnalyze, consoleDebug){
   }
 
   this.options = {
-    host: 'api.ssllabs.com',
+    host: apiHost,
     method: 'GET',
     path: '/'
   };
@@ -39,12 +45,17 @@ util.inherits(SslLabsApi, events.EventEmitter);
 SslLabsApi.prototype._emitError = function _emitError(e){
   debugLog(e);
   clearInterval(intervalObj);
-  this.emit('error', 'Aborting');
+  this.emit('error', e);
 };
 
+SslLabsApi.prototype.version = function version(){
+  return ('\r\nUser Agent  : ' + userAgent + 
+          '\r\nAPI Location: ' + apiLocation
+          + '\r\n');
+}
 
 SslLabsApi.prototype.info = function info(){
-  this.options.path = SSL_LABS_API_V2 + '/info';
+  this.options.path = apiVersionPath + '/info';
   var req = https.request(this.options, this.infoResponse.bind(this));
   req.setTimeout(this.httpReqTimeoutValueInMs, function() {
     req.abort();
@@ -56,7 +67,7 @@ SslLabsApi.prototype.info = function info(){
 
 
 SslLabsApi.prototype.analyzeHost = function analyzeHost(){
-  this.options.path = SSL_LABS_API_V2 + '/analyze?host=' + this.hostToAnalyze;
+  this.options.path = apiVersionPath + '/analyze?host=' + this.hostToAnalyze;
   debugLog(this.options.path);
   var req = https.request(this.options, this.analyzeResponse.bind(this));
   req.setTimeout(this.httpReqTimeoutValueInMs, function() {
@@ -69,7 +80,12 @@ SslLabsApi.prototype.analyzeHost = function analyzeHost(){
 
 
 SslLabsApi.prototype.analyzeHostCached = function analyzeHostCached(maxAge){
-  this.options.path = SSL_LABS_API_V2 + '/analyze?host=' + this.hostToAnalyze + '&fromCache=on&all=done' + '&maxAge=' + maxAge;
+  if(maxAge === undefined){
+    this.options.path = apiVersionPath + '/analyze?host=' + this.hostToAnalyze + '&fromCache=on&all=done';
+  }
+  else{
+    this.options.path = apiVersionPath + '/analyze?host=' + this.hostToAnalyze + '&fromCache=on&all=done' + '&maxAge=' + maxAge;
+  }
   debugLog(this.options.path);
   var req = https.request(this.options, this.analyzeResponse.bind(this));
 
@@ -88,7 +104,7 @@ SslLabsApi.prototype.analyzeHostCached = function analyzeHostCached(maxAge){
 
 SslLabsApi.prototype.analyzeHostNew = function analyzeHostNew(){
   debugLog('2 hostToAnalyze = ' + this.hostToAnalyze);
-  this.options.path = SSL_LABS_API_V2 + '/analyze?host=' + this.hostToAnalyze + '&startNew=on&all=done';
+  this.options.path = apiVersionPath + '/analyze?host=' + this.hostToAnalyze + '&startNew=on&all=done';
   debugLog(this.options.path);
   var req = https.request(this.options, this.analyzeResponse.bind(this));
 
@@ -105,7 +121,7 @@ SslLabsApi.prototype.analyzeHostNew = function analyzeHostNew(){
 };
 
 SslLabsApi.prototype.getEndpointData = function getEndpointData(endpoint){
-  this.options.path = SSL_LABS_API_V2 + '/getEndpointData?host=' + this.hostToAnalyze + '&s=' + endpoint;
+  this.options.path = apiVersionPath + '/getEndpointData?host=' + this.hostToAnalyze + '&s=' + endpoint;
   var req = https.request(this.options, this.endpointResponse.bind(this));
 
   function handleTimeout(){
@@ -120,7 +136,7 @@ SslLabsApi.prototype.getEndpointData = function getEndpointData(endpoint){
 };
 
 SslLabsApi.prototype.getStatusCodes = function getStatusCodes(){
-  this.options.path = SSL_LABS_API_V2 + '/getStatusCodes';
+  this.options.path = apiVersionPath + '/getStatusCodes';
   var req = https.request(this.options, this.statusCodesResponse.bind(this));
 
   function handleTimeout(){
@@ -158,11 +174,13 @@ SslLabsApi.prototype.analyzeResponse = function analyzeResponse(resp){
           debugLog("assessment complete");
         } else if((jsonResp.status === "DNS") || (jsonResp.status === "IN_PROGRESS")){
           debugLog(jsonResp.status);
+        }else if(jsonResp.status === "ERROR"){
+          self._emitError(jsonResp.statusMessage);
         }else{
           self._emitError('Unknown Response Received');
         }
-      } else {
-        self.emit('endpointData', jsonResp);
+      } else{
+        self._emitError(jsonResp);
       }
     }else{
       self._emitError('No Response Body Received');
@@ -200,7 +218,7 @@ SslLabsApi.prototype.infoResponse = function infoResponse(resp){
 
 
 SslLabsApi.prototype.pollAnalyzeRequest = function pollAnalyzeRequest() {
-  this.options.path = SSL_LABS_API_V2 + '/analyze?host=' + this.hostToAnalyze;
+  this.options.path = apiVersionPath + '/analyze?host=' + this.hostToAnalyze;
   var req = https.request(this.options, this.analyzeResponse.bind(this));
 
   function handleTimeout(){
