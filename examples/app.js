@@ -30,11 +30,11 @@ if(!process.argv.slice(2).length){
 }
 
 if(program.info){
-  var sslApi = sslLabsApi('', program.verbose);
+  var sslApi = sslLabsApi('', program.verbosity);
   sslApi.info(); 
 }
 else if(program.codes){
-  var sslApi = sslLabsApi('', program.verbose);
+  var sslApi = sslLabsApi('', program.verbosity);
   sslApi.getStatusCodes(); 
 }
 else if(program.host && !validator.isFQDN(program.host)){
@@ -45,7 +45,7 @@ else if(program.host && !validator.isFQDN(program.host)){
 
 // Assume some defaults if only hostname is provided
 if(program.host){
-  var sslApi = sslLabsApi(program.host, program.verbose);
+  var sslApi = sslLabsApi(program.host, program.verbosity);
   if(program.usecache){
     sslApi.analyzeHostCached();
   }
@@ -54,9 +54,25 @@ if(program.host){
   }
 }
 
-sslApi.on('analyzeData', function(data){
-  sslApi.getEndpointData(sslApi.getEndpointIpAddr(data));
-});
+function printGrade(data){
+  data = JSON.parse(data);
+  console.log('\r\nhost: ' + data.host + 
+              '\r\nFound ' + data.endpoints.length + ' endpoints' + 
+              '\r\nGrades for each:');
+  for(var i = 0; i < data.endpoints.length; i++){
+    console.log(data.endpoints[i].ipAddress + ': ' + data.endpoints[i].grade);
+  }
+}
+
+function printAllAnalyzeData(data){
+  console.log(data);
+}
+
+//Register for events
+if(program.grade)
+  sslApi.on('analyzeData', printGrade);  
+else
+  sslApi.on('analyzeData', printAllAnalyzeData);
 
 sslApi.on('infoResponse', function(data){
   console.log('Received info data: "' + JSON.stringify(data) + '"');
@@ -64,7 +80,14 @@ sslApi.on('infoResponse', function(data){
 });
 
 sslApi.on('endpointData', function(data){
-  console.log('Received endpoints data: "' + JSON.stringify(data) + '"');
+  if (program.grade){
+    if(data.grade && (data.grade !='')){
+      console.log('\r\n' + data.ipAddress + ': ' + data.grade + '\r\n');
+    }
+  }
+  else{
+    console.log('Received endpoints data: "' + JSON.stringify(data) + '"');
+  }
 });
 
 sslApi.on('statusCodesData', function(data){
@@ -74,5 +97,4 @@ sslApi.on('statusCodesData', function(data){
 sslApi.on('error', function(data){
   console.log('Received error event: ', JSON.stringify(data));
 });
-
 

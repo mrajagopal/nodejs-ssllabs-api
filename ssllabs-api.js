@@ -164,12 +164,13 @@ SslLabsApi.prototype.analyzeResponse = function analyzeResponse(resp){
   });
 
   resp.on('end', function(){
-    debugLog(respBody);
+    //debugLog(respBody);
     if (respBody.length){
       var jsonResp = JSON.parse(respBody);
+      //console.log(respBody);
       if (jsonResp.status) {
         if(jsonResp.status === "READY"){
-          self.emit('analyzeData', jsonResp);
+          self.emit('analyzeData', /*jsonResp*/respBody);
           clearInterval(intervalObj);
           debugLog("assessment complete");
         } else if((jsonResp.status === "DNS") || (jsonResp.status === "IN_PROGRESS")){

@@ -45,14 +45,15 @@ module.exports = {
         sslApi.getStatusCodes();
     },
    'Test Analyze Cached Data' : function(test){
-        test.expect(2);
+        test.expect(2);      
         sslApi.on('analyzeData', function(data){
-          test.notStrictEqual(data, undefined, "Status code object is not null");
-          test.notStrictEqual(data.host, undefined);
-          analyzeData = data;
+          analyzeData = JSON.parse(data);
+          test.notStrictEqual(analyzeData, undefined, "Status code object is not null");
+          test.notStrictEqual(analyzeData.host, undefined);
+//          analyzeData = data;
           test.done();
         });
-        sslApi.analyzeHostCached('1');
+        sslApi.analyzeHostCached();
     },
     'Test Endpoint Data' : function(test){
         test.expect(2);
