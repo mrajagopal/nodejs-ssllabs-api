@@ -24,7 +24,7 @@ module.exports = {
       test.expect(8);
       sslApi.on('infoResponse', function(data){
         test.notStrictEqual(data, undefined, "Info Response object is not null");
-        test.strictEqual(data.engineVersion, "1.20.28", "The version is 1.20.28");
+        test.strictEqual(data.engineVersion, "1.21.13", "The version is 1.21.13");
         test.notStrictEqual(data.engineVersion, undefined);
         test.notStrictEqual(data.criteriaVersion, undefined);
         test.notStrictEqual(data.maxAssessments, undefined);
@@ -50,16 +50,14 @@ module.exports = {
           analyzeData = JSON.parse(data);
           test.notStrictEqual(analyzeData, undefined, "Status code object is not null");
           test.notStrictEqual(analyzeData.host, undefined);
-//          analyzeData = data;
           test.done();
         });
         sslApi.analyzeHostCached();
     },
     'Test Endpoint Data' : function(test){
-        test.expect(2);
+        test.expect(1);
         sslApi.on('endpointData', function(data){
           test.notStrictEqual(data.ipAddress, undefined);
-          test.strictEqual(data.serverName, testhost);
           test.done();
         });
         sslApi.getEndpointData(sslApi.getEndpointIpAddr(analyzeData));

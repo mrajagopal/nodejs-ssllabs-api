@@ -6,6 +6,7 @@ var SegfaultHandler = require('segfault-handler');
 var fs = require("fs");
 var program = require('commander');
 var validator = require('validator');
+var progressDotTimer = undefined;
 
 // With no argument, SegfaultHandler will generate a generic log file name
 SegfaultHandler.registerHandler("crash.log"); 
@@ -14,6 +15,10 @@ function getVersion(){
   var sslApi = sslLabsApi('', false);
   return sslApi.version();
 };
+
+function printProgressDot(){
+  process.stdout.write(".");
+}
 
 program.version(getVersion());
 program.description('Command line tool for SSL Labs API using Node.js');
@@ -32,6 +37,7 @@ if(!process.argv.slice(2).length){
 if(program.info){
   var sslApi = sslLabsApi('', program.verbosity);
   sslApi.info(); 
+  process.stdout.write("Working.");
 }
 else if(program.codes){
   var sslApi = sslLabsApi('', program.verbosity);
@@ -47,14 +53,19 @@ else if(program.host && !validator.isFQDN(program.host)){
 if(program.host){
   var sslApi = sslLabsApi(program.host, program.verbosity);
   if(program.usecache){
+    progressDotTimer = setInterval(printProgressDot, 5000);
     sslApi.analyzeHostCached();
+    process.stdout.write("Working.");
   }
   else{
+    progressDotTimer = setInterval(printProgressDot, 5000);
     sslApi.analyzeHostNew();
+    process.stdout.write("Working.");
   }
 }
 
 function printGrade(data){
+  clearInterval(progressDotTimer);
   data = JSON.parse(data);
   console.log('\r\nhost: ' + data.host + 
               '\r\nFound ' + data.endpoints.length + ' endpoints' + 
@@ -65,6 +76,7 @@ function printGrade(data){
 }
 
 function printAllAnalyzeData(data){
+  clearInterval(progressDotTimer);
   console.log(data);
 }
 
@@ -75,26 +87,29 @@ else
   sslApi.on('analyzeData', printAllAnalyzeData);
 
 sslApi.on('infoResponse', function(data){
-  console.log('Received info data: "' + JSON.stringify(data) + '"');
-  console.log(data.engineVersion);
+  clearInterval(progressDotTimer);
+  console.log('\r\nReceived info data: "' + JSON.stringify(data, null, 4) + '"');
 });
 
 sslApi.on('endpointData', function(data){
+  clearInterval(progressDotTimer);
   if (program.grade){
     if(data.grade && (data.grade !='')){
       console.log('\r\n' + data.ipAddress + ': ' + data.grade + '\r\n');
     }
   }
   else{
-    console.log('Received endpoints data: "' + JSON.stringify(data) + '"');
+    console.log('\r\nReceived endpoints data: "' + JSON.stringify(data) + '"');
   }
 });
 
 sslApi.on('statusCodesData', function(data){
-  console.log('Received status-codes data: "' + JSON.stringify(data) + '"');
+  clearInterval(progressDotTimer);
+  console.log('\r\nReceived status-codes data: "' + JSON.stringify(data) + '"');
 });
 
 sslApi.on('error', function(data){
-  console.log('Received error event: ', JSON.stringify(data));
+  clearInterval(progressDotTimer);
+  console.log('\r\nReceived error event: ', JSON.stringify(data));
 });
 
