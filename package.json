@@ -27,9 +27,13 @@
     "url": "https://github.com/mrajagopal/nodejs-ssllabs-api/issues"
   },
   "dependencies": {
+    "commander": "^2.12.2",
     "events": "~1.0.2",
+    "fs": "0.0.1-security",
     "https": "~1.0.0",
-    "util": "~0.10.3"
+    "segfault-handler": "^1.0.0",
+    "util": "~0.10.3",
+    "validator": "^9.2.0"
   },
   "devDependencies": {},
   "homepage": "https://github.com/mrajagopal/nodejs-ssllabs-api#readme"
